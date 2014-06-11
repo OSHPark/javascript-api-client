@@ -3,7 +3,7 @@ class Connection
 
   request: (method, endpoint, params={}, token)->
     new RSVP.Promise (resolve,reject)->
-      reject "Must choose connection subclass"
+      reject new Error "Must choose connection subclass"
 
   defaultHeaders: (token=null)->
     headers = {
