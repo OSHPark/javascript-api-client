@@ -2,6 +2,7 @@ var filterCoffeeScript = require('broccoli-coffee');
 var concatFilter       = require('broccoli-concat');
 var mergeTrees         = require('broccoli-merge-trees');
 var selectFilter       = require('broccoli-select');
+var env                = require('broccoli-env').getEnv();
 
 lib = filterCoffeeScript('lib');
 lib = concatFilter(lib, {
@@ -49,4 +50,22 @@ vendorTrees = [jquery, rsvp, mocha, chai, chai_as_promised];
 
 allTrees = [lib, spec].concat(vendorTrees);
 
-module.exports = mergeTrees(allTrees);
+if (env == 'development') {
+  module.exports = mergeTrees(allTrees);
+}
+else {
+  var uglify     = require('broccoli-uglify-js');
+  var moveFile   = require('broccoli-file-mover');
+  var gzipFilter = require('broccoli-gzip');
+
+  var min = moveFile(uglify(lib), {
+    srcFile: 'oshpark.js',
+    destFile: 'oshpark.min.js'
+  });
+
+  var zip = gzipFilter(min, {
+    extensions: ['js']
+  });
+
+  module.exports = mergeTrees([lib, min, zip]);
+}

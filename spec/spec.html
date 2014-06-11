@@ -1,37 +1,31 @@
 <!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Mocha Spec Runner</title>
-  <link rel="stylesheet" href="mocha.css">
-</head>
-<body>
-  <div id="mocha"></div>
-  <script src="mocha.js"></script>
-  <script>mocha.setup('bdd')</script>
-  <script src="chai.js"></script>
-  <script>
-    var assert = chai.assert;
-    var expect = chai.expect;
-    var should = chai.should();
-  </script>
-  <script src="chai-as-promised.js"></script>
-  <script src="jquery.js"></script>
-  <script src="rsvp.js"></script>
-  <script src="oshpark.js"></script>
-  <script src="spec.js"></script>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Mocha Spec Runner</title>
+    <link rel="stylesheet" href="mocha.css">
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="jquery.js"></script>
+    <script src="rsvp.js"></script>
+    <script src="mocha.js"></script>
+    <script>mocha.setup('bdd')</script>
+    <script src="chai.js"></script>
+    <script>
+      var assert = chai.assert;
+      var expect = chai.expect;
+      var should = chai.should();
+    </script>
+    <script src="chai-as-promised.js"></script>
+    <script src="oshpark.js"></script>
+    <script src="spec.js"></script>
 
-  <script type="text/javascript">
-    // If tests run in a real browser
-    // Can alternatively do a check on window.PHANTOMJS
-    // To prevent double running of tests
-    if (navigator.userAgent.indexOf('PhantomJS') < 0) {
-      // run only onReady to prevent 'Error: Cannot re-register: `store:main`, as it has already been looked up.': https://github.com/emberjs/ember.js/issues/3484
+    <script type="text/javascript">
       $(document).ready(function() {
         mocha.run();
       });
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>
