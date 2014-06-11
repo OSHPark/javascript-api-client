@@ -1,0 +1,13 @@
+{
+  "name": "oshpark",
+  "version": "0.0.1",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "jquery": "1.10.1",
+    "mocha": "~1.20.1",
+    "rsvp": "3.0.8",
+    "chai": "1.9.1",
+    "chai-as-promised": "4.1.1"
+  }
+}
