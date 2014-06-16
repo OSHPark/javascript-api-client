@@ -1,70 +1,4 @@
 (function() {
-  var __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  describe('Oshpark.Client', function() {
-    var client;
-    client = null;
-    beforeEach(function() {
-      return client = new Oshpark.Client;
-    });
-    it('exists', function() {
-      return expect(Oshpark.Client).to.exist;
-    });
-    return describe('#constructor', function() {
-      describe('default arguments', function() {
-        it('creates a JQueryConnection', function() {
-          return expect(client.connection).to.be.an["instanceof"](Oshpark.JQueryConnection);
-        });
-        return it('sets the URL to "https://oshpark.com/api/v1"', function() {
-          return expect(client.connection).to.haveOwnProperty('endpointUrl', "https://oshpark.com/api/v1");
-        });
-      });
-      describe('setting URL', function() {
-        beforeEach(function() {
-          return client = new Oshpark.Client({
-            url: 'foo.com'
-          });
-        });
-        it('creates a JQueryConnection', function() {
-          return expect(client.connection).to.be.an["instanceof"](Oshpark.JQueryConnection);
-        });
-        return it('sets the URL', function() {
-          return expect(client.connection).to.haveOwnProperty('endpointUrl', "foo.com");
-        });
-      });
-      return describe('setting the connection class', function() {
-        var fakeConnection;
-        fakeConnection = null;
-        beforeEach(function() {
-          var FakeConnection;
-          fakeConnection = FakeConnection = (function(_super) {
-            __extends(FakeConnection, _super);
-
-            function FakeConnection() {
-              return FakeConnection.__super__.constructor.apply(this, arguments);
-            }
-
-            return FakeConnection;
-
-          })(Oshpark.Connection);
-          return client = new Oshpark.Client({
-            connection: fakeConnection
-          });
-        });
-        it('creates a connection', function() {
-          return expect(client.connection).to.be.an["instanceof"](fakeConnection);
-        });
-        return it('sets the URL to "https://oshpark.com/api/v1"', function() {
-          return expect(client.connection).to.haveOwnProperty('endpointUrl', "https://oshpark.com/api/v1");
-        });
-      });
-    });
-  });
-
-}).call(this);
-
-(function() {
   window.Oshpark = {};
 
 }).call(this);
@@ -160,7 +94,7 @@
         params = {};
       }
       return new RSVP.Promise(function(resolve, reject) {
-        return reject("Must choose connection subclass");
+        return reject(new Error("Must choose connection subclass"));
       });
     };
 
@@ -199,21 +133,24 @@
     }
 
     JQueryConnection.prototype.request = function(method, endpoint, params, token) {
+      var headers, url;
       if (params == null) {
         params = {};
       }
+      headers = this.defaultHeaders(token);
+      url = "" + this.endpointUrl + "/" + endpoint;
       return new RSVP.Promise(function(resolve, reject) {
-        return $.ajax({
+        return jQuery.ajax({
           dataType: 'json',
           data: params,
-          headers: this.defaultHeaders(token),
-          url: "" + this.endpointUrl + "/" + endpoint,
+          headers: headers,
+          url: url,
           type: method,
           success: function(data) {
             return resolve(data);
           },
           error: function(xhr, textStatus, errorThrown) {
-            return reject([textStatus, errorThrown]);
+            return reject(errorThrown);
           }
         });
       });

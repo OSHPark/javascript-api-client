@@ -1,13 +1,20 @@
 {
   "name": "oshpark",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Browser API client for OSH-Park",
-  "main": "index.js",
+  "main": "dist/oshpark.js",
+  "author": {
+    "name": "James Harton",
+    "email" : "james@resistor.io"
+  },
   "scripts": {
     "test": "grunt test"
   },
-  "author": "",
-  "license": "BSD-2-Clause",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OSHPark/javascript-api-client"
+  },
   "devDependencies": {
     "broccoli": "~0.12.2",
     "broccoli-coffee": "~0.1.0",

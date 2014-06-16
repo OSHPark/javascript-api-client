@@ -18,8 +18,8 @@ refreshToken = (params={})->
 
 class Client
   constructor: ({url, connection}={})->
-    url ?= "https://oshpark.com/api/v1"
-    connection ?= Oshpark.JQueryConnection
+    url         ?= "https://oshpark.com/api/v1"
+    connection  ?= Oshpark.JQueryConnection
     @connection = new connection url
     refreshToken.call(@)
 

@@ -41,17 +41,28 @@ chai = selectFilter('bower_components/chai', {
   outputDir: '/'
 });
 
-chai_as_promised = selectFilter('bower_components/chai-as-promised/lib', {
+chaiAsPromised = selectFilter('bower_components/chai-as-promised/lib', {
   acceptFiles: ['chai-as-promised.js'],
   outputDir: '/'
 });
 
-vendorTrees = [jquery, rsvp, mocha, chai, chai_as_promised];
+sinon = concatFilter('bower_components/sinon', {
+  inputFiles: ['index.js'],
+  outputFile: '/sinon.js'
+});
+
+sinonChai = selectFilter('bower_components/sinon-chai/lib', {
+  acceptFiles: ['sinon-chai.js'],
+  outputDir: '/'
+});
+
+vendorTrees = [jquery, rsvp, mocha, chai, chaiAsPromised, sinon, sinonChai];
 
 allTrees = [lib, spec].concat(vendorTrees);
 
+var exported;
 if (env == 'development') {
-  module.exports = mergeTrees(allTrees);
+  exported = mergeTrees(allTrees);
 }
 else {
   var uglify     = require('broccoli-uglify-js');
@@ -67,5 +78,7 @@ else {
     extensions: ['js']
   });
 
-  module.exports = mergeTrees([lib, min, zip]);
+  exported = mergeTrees([lib, min, zip]);
 }
+
+module.exports = exported;

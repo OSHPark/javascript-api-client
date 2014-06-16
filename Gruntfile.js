@@ -27,7 +27,7 @@ module.exports = function(grunt) {
         src: 'public/spec.html',
       }
     },
-    clean: ['public']
+    clean: ['public', 'dist']
   });
 
   grunt.registerTask('test', ['bower:install', 'broccoli:spec:build', 'mocha:specs', 'clean']);

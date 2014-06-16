@@ -42,3 +42,29 @@ describe 'Oshpark.Client', ->
       it 'sets the URL to "https://oshpark.com/api/v1"', ->
         expect(client.connection).to.haveOwnProperty('endpointUrl', "https://oshpark.com/api/v1")
 
+  describe '#defaultHeaders', ->
+
+    connection = null
+
+    beforeEach ->
+      connection = new Oshpark.Connection
+
+    it 'sets the "Accept" header', ->
+      expect(connection.defaultHeaders()).to.haveOwnProperty('Accept', 'application/json')
+
+    describe 'when there is a token', ->
+
+      token = null
+      Token = class Token
+        token: -> 'abcdef'
+
+      beforeEach ->
+        token      = new Token
+
+      it 'sets the "Authorization" header', ->
+        expect(connection.defaultHeaders(token)).to.haveOwnProperty('Authorization', 'abcdef')
+
+    describe 'when there is no token', ->
+
+      it 'does not set the "Authorization" header', ->
+        expect(connection.defaultHeaders()).not.to.haveOwnProperty('Authorization')
