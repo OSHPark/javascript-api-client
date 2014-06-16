@@ -9,7 +9,7 @@ class Connection
     headers = {
       'Accept': 'application/json'
     }
-    headers['Authorization'] = token.token() if token?
+    headers['Authorization'] = token.token if token?
     headers
 
 Oshpark.Connection = Connection
