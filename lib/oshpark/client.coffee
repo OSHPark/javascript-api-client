@@ -12,7 +12,7 @@ getRequest = (endpoint, params)->
 deleteRequest = (endpoint, params)->
   @connection.request 'DELETE', endpoint, params, @token
 
-refreshToken = (params={})->
+reallyRequestToken = (params)->
   postRequest.call @, 'sessions', params
     .then (json)=>
       @token = new Oshpark.Token(json['api_session_token'])
@@ -20,6 +20,13 @@ refreshToken = (params={})->
       ttl = 10 if ttl < 10
       clearTimeout(lastTimeoutId) if lastTimeoutId?
       lastTimeoutId = setTimeout (=> refreshToken.call(@)), ttl * 1000
+      @token
+
+refreshToken = (params={})->
+  if @tokenPromise
+    @tokenPromise.then => reallyRequestToken.call(@, params)
+  else
+    @tokenPromise = reallyRequestToken.call(@, params)
 
 class Client
   constructor: ({url, connection}={})->
@@ -34,15 +41,30 @@ class Client
   isAuthenticated: ->
     @token && @token.user?
 
-  authenticate: (opts={})->
-    new RSVP.Promise (resolve,reject)=>
-      refreshToken.call(@, opts)
-        .then (token)->
-          if token.user?
-            resolve token.user
-          else
-            reject "Incorrect username or password"
-        .fail (error)-> reject error
+  # Authenticate with a given username and password, or api secret.
+  #
+  #     client.authenticate 'user@example.com', withPassword: 'myPassword'
+  #
+  #  or
+  #
+  #     client.authenticate 'user@example.com', withApiSecret: 'mySecret'
+  #
+  authenticate: (email, opts={})->
+    @tokenPromise.then =>
+      params = email: email
+      if opts.withPassword?
+        params.password = opts.withPassword
+      else if opts.withApiSecret?
+        params.api_key = (new jsSHA("#{email}:#{opts.withApiSecret}:#{@token.token}", 'TEXT')).getHash('SHA-256', 'HEX')
+
+      new RSVP.Promise (resolve,reject)=>
+        refreshToken.call(@, params)
+          .then (token)->
+            if token.user_id?
+              resolve token.user_id
+            else
+              reject "Incorrect username or password"
+          .catch (error)-> reject error
 
   projects: ->
     getRequest.call @, 'projects'

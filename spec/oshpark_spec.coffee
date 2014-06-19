@@ -1,4 +1,4 @@
 describe 'Oshpark', ->
 
   it 'exists', ->
-    expect(Oshpark).to.be
+    expect(Oshpark).to.exist

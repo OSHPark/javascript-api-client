@@ -42,29 +42,30 @@ describe 'Oshpark.Client', ->
       it 'sets the URL to "https://oshpark.com/api/v1"', ->
         expect(client.connection).to.haveOwnProperty('endpointUrl', "https://oshpark.com/api/v1")
 
-  describe '#defaultHeaders', ->
+  describe '#authenticate', ->
 
-    connection = null
+    jsonBody    = '{"api_session_token":{"token":"abcd1234","ttl":1199,"user_id":"123"}}'
+    jsonHeader  = {'Content-Type': 'application/json'}
+    lastRequest = null
 
     beforeEach ->
-      connection = new Oshpark.Connection
+      @server.respondWith [201, jsonHeader, jsonBody]
+      @server.autoRespond = true
+      client = new Oshpark.Client
 
-    it 'sets the "Accept" header', ->
-      expect(connection.defaultHeaders()).to.haveOwnProperty('Accept', 'application/json')
+    afterEach ->
+      @server.restore()
 
-    describe 'when there is a token', ->
+    describe 'when authenticating with a password', ->
 
-      token = null
-      Token = class Token
-        token: -> 'abcdef'
+      it 'refreshes the user\'s token with the email address and password', ->
+        client.authenticate 'user@example.com', withPassword: 'myPassword'
+          .then =>
+            expect(@server.lastRequest()).to.have.property('requestBody', 'email=user%40example.com&password=myPassword')
 
-      beforeEach ->
-        token      = new Token
+    describe 'when authenticating with an API secret', ->
 
-      it 'sets the "Authorization" header', ->
-        expect(connection.defaultHeaders(token)).to.haveOwnProperty('Authorization', 'abcdef')
-
-    describe 'when there is no token', ->
-
-      it 'does not set the "Authorization" header', ->
-        expect(connection.defaultHeaders()).not.to.haveOwnProperty('Authorization')
+      it 'refreshes the user\'s token with the email address and computed API key', ->
+        client.authenticate 'user@example.com', withApiSecret: 'mySecret'
+          .then =>
+            expect(@server.lastRequest()).to.have.property('requestBody', 'email=user%40example.com&api_key=5bce1d7d2cd70a8559157a78ec7ab018f533cc54b9cd5b8bbc05bc4be32fd2e4')

@@ -4,12 +4,14 @@ var mergeTrees         = require('broccoli-merge-trees');
 var selectFilter       = require('broccoli-select');
 var env                = require('broccoli-env').getEnv();
 
+// Concatenate all coffeescript in lib.
 lib = filterCoffeeScript('lib');
 lib = concatFilter(lib, {
   inputFiles: ['**/*.js'],
   outputFile: '/oshpark.js'
 });
 
+// Concatenate all coffeescript in spec.
 spec = filterCoffeeScript('spec');
 spec = concatFilter(spec, {
   inputFiles: ['**/*.js'],
@@ -21,16 +23,7 @@ spec_html = selectFilter('spec', {
 });
 spec = mergeTrees([spec, spec_html]);
 
-jquery = selectFilter('bower_components/jquery', {
-  acceptFiles: ['jquery.js'],
-  outputDir: '/'
-});
-
-rsvp = selectFilter('bower_components/rsvp', {
-  acceptFiles: ['rsvp.js'],
-  outputDir: '/'
-});
-
+// Development dependencies
 mocha = selectFilter('bower_components/mocha', {
   acceptFiles: ['mocha.js', 'mocha.css'],
   outputDir: '/'
@@ -56,9 +49,33 @@ sinonChai = selectFilter('bower_components/sinon-chai/lib', {
   outputDir: '/'
 });
 
-vendorTrees = [jquery, rsvp, mocha, chai, chaiAsPromised, sinon, sinonChai];
+devTrees = [mocha, chai, chaiAsPromised, sinon, sinonChai];
+dev = mergeTrees(devTrees);
 
-allTrees = [lib, spec].concat(vendorTrees);
+// Dependencies
+jsSha = selectFilter('bower_components/jssha/src', {
+  acceptFiles: ['sha256.js'],
+  outputDir: '/'
+});
+
+jquery = selectFilter('bower_components/jquery/dist', {
+  acceptFiles: ['jquery.js'],
+  outputDir: '/'
+});
+
+rsvp = selectFilter('bower_components/rsvp', {
+  acceptFiles: ['rsvp.js'],
+  outputDir: '/'
+});
+
+vendorTrees = [jquery, rsvp, jsSha];
+vendor = concatFilter(mergeTrees(vendorTrees), {
+  inputFiles: ['**/*.js'],
+  outputFile: '/vendor.js',
+  wrapInEval: false
+});
+
+allTrees = [lib, spec, dev, vendor];
 
 var exported;
 if (env == 'development') {

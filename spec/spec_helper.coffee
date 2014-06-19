@@ -1,11 +1,7 @@
-window.xhrMock = null
-window.xhrRequests = []
-
 beforeEach ->
-  window.xhrMock = sinon.useFakeXMLHttpRequest()
-  xhrMock.onCreate = (xhr)->
-    xhrRequests.push xhr
+  @server = sinon.fakeServer.create()
+  @server.lastRequest = =>
+    @server.requests[@server.requests.length - 1]
 
 afterEach ->
-  xhrMock.restore()
-  window.xhrRequests = []
+  @server.restore()
