@@ -67,12 +67,12 @@ describe 'Oshpark.Client', ->
           .then =>
             expect(@server.lastRequest()).to.have.property('requestBody', 'email=user%40example.com&api_key=5bce1d7d2cd70a8559157a78ec7ab018f533cc54b9cd5b8bbc05bc4be32fd2e4')
 
-  ['project', 'order', 'panel'].forEach (resource_name)->
-    resources_name  = "#{resource_name}s"
-    resource_klass  = Oshpark[resource_name.charAt(0).toUpperCase() + resource_name.slice(1).toLowerCase()]
+  ['project', 'order', 'panel'].forEach (resourceName)->
+    resourcesName  = "#{resourceName}s"
+    resourceKlass  = Oshpark[resourceName.charAt(0).toUpperCase() + resourceName.slice(1).toLowerCase()]
 
-    describe "##{resources_name}", ->
-      jsonBody = "{\"#{resources_name}\": [{ \"id\": \"abcdef\" }]}"
+    describe "##{resourcesName}", ->
+      jsonBody = "{\"#{resourcesName}\": [{ \"id\": \"abcdef\" }]}"
 
       beforeEach ->
         @server.respondWith [200, @jsonHeader, jsonBody]
@@ -81,24 +81,24 @@ describe 'Oshpark.Client', ->
       afterEach -> @server.restore()
 
       it 'is a promise', ->
-        expect(@client[resources_name]()).to.eventually.be.fulfilled
+        expect(@client[resourcesName]()).to.eventually.be.fulfilled
 
       it 'is to the correct URL', ->
-        @client[resources_name]().then =>
-          expect(@server.lastRequest()).to.have.property('url', "https://oshpark.com/api/v1/#{resources_name}")
+        @client[resourcesName]().then =>
+          expect(@server.lastRequest()).to.have.property('url', "https://oshpark.com/api/v1/#{resourcesName}")
 
       it 'is the correct HTTP method', ->
-        @client[resources_name]().then =>
+        @client[resourcesName]().then =>
           expect(@server.lastRequest()).to.have.property('method', 'GET')
 
-      it "retrieves the current users\'s #{resources_name} from the API", ->
-        @client[resources_name]().then (resources)->
+      it "retrieves the current users\'s #{resourcesName} from the API", ->
+        @client[resourcesName]().then (resources)->
           resources.forEach (resource)->
-            expect(resource).to.have.property('constructor', resource_klass)
+            expect(resource).to.have.property('constructor', resourceKlass)
             expect(resource).to.have.property('id', 'abcdef')
 
-    describe "##{resource_name}(:id)", ->
-      jsonBody = "{\"#{resource_name}\": { \"id\": \"abc123\" } }"
+    describe "##{resourceName}(:id)", ->
+      jsonBody = "{\"#{resourceName}\": { \"id\": \"abc123\" } }"
 
       beforeEach ->
         @server.respondWith [200, @jsonHeader, jsonBody]
@@ -107,21 +107,23 @@ describe 'Oshpark.Client', ->
       afterEach -> @server.restore()
 
       it 'is a promise', ->
-        expect(@client[resource_name]('abc123')).to.eventually.be.fulfilled
+        expect(@client[resourceName]('abc123')).to.eventually.be.fulfilled
 
       it 'fails when not passed an id', ->
-        expect(@client[resource_name]()).to.be.rejected
+        expect(@client[resourceName]()).to.be.rejected
 
       it 'is to the correct URL', ->
-        @client[resource_name]('abc123').then =>
-          expect(@server.lastRequest()).to.have.property('url', "https://oshpark.com/api/v1/#{resources_name}/abc123")
+        @client[resourceName]('abc123').then =>
+          expect(@server.lastRequest()).to.have.property('url', "https://oshpark.com/api/v1/#{resourcesName}/abc123")
 
       it 'is the correct HTTP method', ->
-        @client[resource_name]('abc123').then =>
+        @client[resourceName]('abc123').then =>
           expect(@server.lastRequest()).to.have.property('method', 'GET')
 
-      it "retrieves a specific #{resource_name} from the API", ->
-        @client[resource_name]('abc123').then (project)->
-          expect(project).to.have.property('constructor', resource_klass)
+      it "retrieves a specific #{resourceName} from the API", ->
+        @client[resourceName]('abc123').then (project)->
+          expect(project).to.have.property('constructor', resourceKlass)
           expect(project).to.have.property('id', 'abc123')
 
+
+  describe '#approveProject(:id)', ->

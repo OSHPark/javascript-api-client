@@ -3,4 +3,7 @@ class Token extends Oshpark.modelWithAttributes(['token', 'ttl', 'user_id'])
     super json
     @user = new Oshpark.User id: @user_id if @user_id?
 
+  userId: ->
+    @user_id
+
 Oshpark.Token = Token

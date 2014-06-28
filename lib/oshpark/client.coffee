@@ -28,19 +28,19 @@ refreshToken = (params={})->
   else
     @tokenPromise = reallyRequestToken.call(@, params)
 
-resources = (resources_name,klass)->
-  getRequest.call @, resources_name
+resources = (resourcesName,klass)->
+  getRequest.call @, resourcesName
     .then (data)->
-      new klass json for json in data[resources_name]
+      new klass json for json in data[resourcesName]
 
-resource = (resource_name,klass,id)->
+resource = (resourceName,klass,id)->
   new RSVP.Promise (resolve,reject)->
-    reject(new Error "must provide an id for #{resource_name}") unless id?
+    reject(new Error "must provide an id for #{resourceName}") unless id?
     resolve()
   .then =>
-    getRequest.call @, "#{resource_name}s/#{id}"
+    getRequest.call @, "#{resourceName}s/#{id}"
     .then (data)->
-      new klass data[resource_name]
+      new klass data[resourceName]
 
 class Client
   constructor: ({url, connection}={})->
@@ -74,8 +74,8 @@ class Client
       new RSVP.Promise (resolve,reject)=>
         refreshToken.call(@, params)
           .then (token)->
-            if token.user_id?
-              resolve token.user_id
+            if token.userId?
+              resolve token.userId
             else
               reject "Incorrect username or password"
           .catch (error)-> reject error
