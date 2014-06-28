@@ -28,6 +28,20 @@ refreshToken = (params={})->
   else
     @tokenPromise = reallyRequestToken.call(@, params)
 
+resources = (resources_name,klass)->
+  getRequest.call @, resources_name
+    .then (data)->
+      new klass json for json in data[resources_name]
+
+resource = (resource_name,klass,id)->
+  new RSVP.Promise (resolve,reject)->
+    reject(new Error "must provide an id for #{resource_name}") unless id?
+    resolve()
+  .then =>
+    getRequest.call @, "#{resource_name}s/#{id}"
+    .then (data)->
+      new klass data[resource_name]
+
 class Client
   constructor: ({url, connection}={})->
     url         ?= "https://oshpark.com/api/v1"
@@ -66,24 +80,23 @@ class Client
               reject "Incorrect username or password"
           .catch (error)-> reject error
 
+  # Retrieve a list of the current user's projects.
   projects: ->
-    getRequest.call @, 'projects'
-      .then (data)->
-        new Oshpark.Project json for json in data['projects']
+    resources.call @, 'projects', Oshpark.Project
 
   project: (id)->
-    getRequest.call @, "projects/#{id}"
-      .then (data)->
-        new Oshpark.Project data['project']
+    resource.call @, 'project', Oshpark.Project, id
 
   orders: ->
-    getRequest.call @, 'orders'
-      .then (data)->
-        new Oshpark.Order json for json in data['orders']
+    resources.call @, 'orders', Oshpark.Order
 
   order: (id)->
-    getRequest.call @, "orders/#{id}"
-      .then (data)->
-        new Oshpark.Order data['order']
+    resource.call @, 'order', Oshpark.Order, id
+
+  panels: ->
+    resources.call @, 'panels', Oshpark.Panel
+
+  panel: (id)->
+    resource.call @, 'panel', Oshpark.Panel, id
 
 Oshpark.Client = Client
