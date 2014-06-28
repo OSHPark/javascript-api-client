@@ -121,9 +121,36 @@ describe 'Oshpark.Client', ->
           expect(@server.lastRequest()).to.have.property('method', 'GET')
 
       it "retrieves a specific #{resourceName} from the API", ->
-        @client[resourceName]('abc123').then (project)->
-          expect(project).to.have.property('constructor', resourceKlass)
-          expect(project).to.have.property('id', 'abc123')
+        @client[resourceName]('abc123').then (resource)->
+          expect(resource).to.have.property('constructor', resourceKlass)
+          expect(resource).to.have.property('id', 'abc123')
 
 
   describe '#approveProject(:id)', ->
+
+    beforeEach ->
+      @server.respondWith [200, @jsonHeader, '{ "project": { "id": "abc123", "state": "APPROVED" } }']
+      @server.autoRespond = true
+
+    afterEach -> @server.restore()
+
+    it 'is a promise', ->
+      expect(@client.approveProject('abc123')).to.eventually.be.fulfilled
+
+    it 'fails with not passed an id', ->
+      expect(@client.approveProject()).to.be.rejected
+
+    it 'is to the correct URL', ->
+      @client.approveProject('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/projects/abc123/approve')
+
+    it 'is the correct HTTP method', ->
+      @client.approveProject('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('method', 'GET')
+
+
+    it 'returns the modified Project', ->
+      @client.approveProject('abc123').then (project)->
+        expect(project).to.have.property('constructor', Oshpark.Project)
+        expect(project).to.have.property('id', 'abc123')
+        expect(project).to.have.property('state', 'APPROVED')

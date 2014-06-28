@@ -33,11 +33,13 @@ resources = (resourcesName,klass)->
     .then (data)->
       new klass json for json in data[resourcesName]
 
-resource = (resourceName,klass,id)->
+argumentPromise = (id)->
   new RSVP.Promise (resolve,reject)->
     reject(new Error "must provide an id for #{resourceName}") unless id?
-    resolve()
-  .then =>
+    resolve(id)
+
+resource = (resourceName,klass,id)->
+  argumentPromise(id).then =>
     getRequest.call @, "#{resourceName}s/#{id}"
     .then (data)->
       new klass data[resourceName]
@@ -86,6 +88,12 @@ class Client
 
   project: (id)->
     resource.call @, 'project', Oshpark.Project, id
+
+  approveProject: (id)->
+    argumentPromise(id).then =>
+      getRequest.call @, "projects/#{id}/approve"
+      .then (data)->
+        new Oshpark.Project data['project']
 
   orders: ->
     resources.call @, 'orders', Oshpark.Order
