@@ -23,7 +23,7 @@
 }).call(this);
 
 (function() {
-  var Client, deleteRequest, getRequest, lastTimeoutId, postRequest, putRequest, reallyRequestToken, refreshToken;
+  var Client, deleteRequest, getRequest, lastTimeoutId, postRequest, putRequest, reallyRequestToken, refreshToken, resource, resources;
 
   lastTimeoutId = null;
 
@@ -76,6 +76,34 @@
     } else {
       return this.tokenPromise = reallyRequestToken.call(this, params);
     }
+  };
+
+  resources = function(resources_name, klass) {
+    return getRequest.call(this, resources_name).then(function(data) {
+      var json, _i, _len, _ref, _results;
+      _ref = data[resources_name];
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        json = _ref[_i];
+        _results.push(new klass(json));
+      }
+      return _results;
+    });
+  };
+
+  resource = function(resource_name, klass, id) {
+    return new RSVP.Promise(function(resolve, reject) {
+      if (id == null) {
+        reject(new Error("must provide an id for " + resource_name));
+      }
+      return resolve();
+    }).then((function(_this) {
+      return function() {
+        return getRequest.call(_this, "" + resource_name + "s/" + id).then(function(data) {
+          return new klass(data[resource_name]);
+        });
+      };
+    })(this));
   };
 
   Client = (function() {
@@ -131,41 +159,27 @@
     };
 
     Client.prototype.projects = function() {
-      return getRequest.call(this, 'projects').then(function(data) {
-        var json, _i, _len, _ref, _results;
-        _ref = data['projects'];
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          json = _ref[_i];
-          _results.push(new Oshpark.Project(json));
-        }
-        return _results;
-      });
+      return resources.call(this, 'projects', Oshpark.Project);
     };
 
     Client.prototype.project = function(id) {
-      return getRequest.call(this, "projects/" + id).then(function(data) {
-        return new Oshpark.Project(data['project']);
-      });
+      return resource.call(this, 'project', Oshpark.Project, id);
     };
 
     Client.prototype.orders = function() {
-      return getRequest.call(this, 'orders').then(function(data) {
-        var json, _i, _len, _ref, _results;
-        _ref = data['orders'];
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          json = _ref[_i];
-          _results.push(new Oshpark.Order(json));
-        }
-        return _results;
-      });
+      return resources.call(this, 'orders', Oshpark.Order);
     };
 
     Client.prototype.order = function(id) {
-      return getRequest.call(this, "orders/" + id).then(function(data) {
-        return new Oshpark.Order(data['order']);
-      });
+      return resource.call(this, 'order', Oshpark.Order, id);
+    };
+
+    Client.prototype.panels = function() {
+      return resources.call(this, 'panels', Oshpark.Panel);
+    };
+
+    Client.prototype.panel = function(id) {
+      return resource.call(this, 'panel', Oshpark.Panel, id);
     };
 
     return Client;
@@ -296,6 +310,26 @@
   })(Oshpark.modelWithAttributes(['id', 'board_cost', 'cancellation_reason', 'cancelled_at', 'ordered_at', 'payment_provider', 'payment_received_at', 'project_name', 'quantity', 'shipping_address', 'shipping_cost', 'shipping_country', 'shipping_method', 'shipping_name', 'state', 'total_cost', 'project_id', 'panel_id']));
 
   Oshpark.Order = Order;
+
+}).call(this);
+
+(function() {
+  var Panel,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Panel = (function(_super) {
+    __extends(Panel, _super);
+
+    function Panel() {
+      return Panel.__super__.constructor.apply(this, arguments);
+    }
+
+    return Panel;
+
+  })(Oshpark.modelWithAttributes(['id', 'pcb_layers', 'scheduled_order_time', 'expected_receive_time', 'ordered_at', 'received_at', 'state', 'service', 'total_orders', 'total_boards', 'board_area_in_square_mils']));
+
+  Oshpark.Panel = Panel;
 
 }).call(this);
 
