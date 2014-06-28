@@ -67,170 +67,61 @@ describe 'Oshpark.Client', ->
           .then =>
             expect(@server.lastRequest()).to.have.property('requestBody', 'email=user%40example.com&api_key=5bce1d7d2cd70a8559157a78ec7ab018f533cc54b9cd5b8bbc05bc4be32fd2e4')
 
-  describe '#projects', ->
-    jsonBody = '{"projects": [ { "id": "abcdef" }]}'
+  ['project', 'order', 'panel'].forEach (resource_name)->
+    resources_name  = "#{resource_name}s"
+    resource_klass  = Oshpark[resource_name.charAt(0).toUpperCase() + resource_name.slice(1).toLowerCase()]
 
-    beforeEach ->
-      @server.respondWith [200, @jsonHeader, jsonBody]
-      @server.autoRespond = true
+    describe "##{resources_name}", ->
+      jsonBody = "{\"#{resources_name}\": [{ \"id\": \"abcdef\" }]}"
 
-    afterEach ->
-      @server.restore()
+      beforeEach ->
+        @server.respondWith [200, @jsonHeader, jsonBody]
+        @server.autoRespond = true
 
-    it 'is a promise', ->
-      expect(@client.projects()).to.eventually.be.fulfilled
+      afterEach -> @server.restore()
 
-    it 'is to the correct URL', ->
-      @client.projects().then =>
-        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/projects')
+      it 'is a promise', ->
+        expect(@client[resources_name]()).to.eventually.be.fulfilled
 
-    it 'is the correct HTTP method', ->
-      @client.projects().then =>
-        expect(@server.lastRequest()).to.have.property('method', 'GET')
+      it 'is to the correct URL', ->
+        @client[resources_name]().then =>
+          expect(@server.lastRequest()).to.have.property('url', "https://oshpark.com/api/v1/#{resources_name}")
 
-    it 'retrieves the current users\'s projects from the API', ->
-      @client.projects().then (projects)->
-        projects.forEach (project)->
-          expect(project).to.have.property('constructor', Oshpark.Project)
-          expect(project).to.have.property('id', 'abcdef')
+      it 'is the correct HTTP method', ->
+        @client[resources_name]().then =>
+          expect(@server.lastRequest()).to.have.property('method', 'GET')
 
-  describe '#project(:id)', ->
-    jsonBody = '{"project": { "id": "abc123"} }'
+      it "retrieves the current users\'s #{resources_name} from the API", ->
+        @client[resources_name]().then (resources)->
+          resources.forEach (resource)->
+            expect(resource).to.have.property('constructor', resource_klass)
+            expect(resource).to.have.property('id', 'abcdef')
 
-    beforeEach ->
-      @server.respondWith [200, @jsonHeader, jsonBody]
-      @server.autoRespond = true
+    describe "##{resource_name}(:id)", ->
+      jsonBody = "{\"#{resource_name}\": { \"id\": \"abc123\" } }"
 
-    afterEach ->
-      @server.restore()
+      beforeEach ->
+        @server.respondWith [200, @jsonHeader, jsonBody]
+        @server.autoRespond = true
 
-    it 'is a promise', ->
-      expect(@client.project('abc123')).to.eventually.be.fulfilled
+      afterEach -> @server.restore()
 
-    it 'fails when not passed an id', ->
-      expect(@client.project()).to.be.rejected
+      it 'is a promise', ->
+        expect(@client[resource_name]('abc123')).to.eventually.be.fulfilled
 
-    it 'is to the correct URL', ->
-      @client.project('abc123').then =>
-        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/projects/abc123')
+      it 'fails when not passed an id', ->
+        expect(@client[resource_name]()).to.be.rejected
 
-    it 'is the correct HTTP method', ->
-      @client.project('abc123').then =>
-        expect(@server.lastRequest()).to.have.property('method', 'GET')
+      it 'is to the correct URL', ->
+        @client[resource_name]('abc123').then =>
+          expect(@server.lastRequest()).to.have.property('url', "https://oshpark.com/api/v1/#{resources_name}/abc123")
 
-    it 'retrieves a specific project from the API', ->
-      @client.project('abc123').then (project)->
-        expect(project).to.have.property('constructor', Oshpark.Project)
-        expect(project).to.have.property('id', 'abc123')
+      it 'is the correct HTTP method', ->
+        @client[resource_name]('abc123').then =>
+          expect(@server.lastRequest()).to.have.property('method', 'GET')
 
-  describe '#orders', ->
-    jsonBody = '{"orders": [ { "id": "abcdef" }]}'
+      it "retrieves a specific #{resource_name} from the API", ->
+        @client[resource_name]('abc123').then (project)->
+          expect(project).to.have.property('constructor', resource_klass)
+          expect(project).to.have.property('id', 'abc123')
 
-    beforeEach ->
-      @server.respondWith [200, @jsonHeader, jsonBody]
-      @server.autoRespond = true
-
-    afterEach ->
-      @server.restore()
-
-    it 'is a promise', ->
-      expect(@client.orders()).to.eventually.be.fulfilled
-
-    it 'is to the correct URL', ->
-      @client.orders().then =>
-        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/orders')
-
-    it 'is the correct HTTP method', ->
-      @client.orders().then =>
-        expect(@server.lastRequest()).to.have.property('method', 'GET')
-
-    it 'retrieves the current users\'s orders from the API', ->
-      @client.orders().then (orders)->
-        orders.forEach (order)->
-          expect(order).to.have.property('constructor', Oshpark.Order)
-          expect(order).to.have.property('id', 'abcdef')
-
-  describe '#order(:id)', ->
-    jsonBody = '{"order": { "id": "abc123"} }'
-
-    beforeEach ->
-      @server.respondWith [200, @jsonHeader, jsonBody]
-      @server.autoRespond = true
-
-    afterEach ->
-      @server.restore()
-
-    it 'is a promise', ->
-      expect(@client.order('abc123')).to.eventually.be.fulfilled
-
-    it 'fails when not passed an id', ->
-      expect(@client.order()).to.be.rejected
-
-    it 'is to the correct URL', ->
-      @client.order('abc123').then =>
-        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/orders/abc123')
-
-    it 'is the correct HTTP method', ->
-      @client.order('abc123').then =>
-        expect(@server.lastRequest()).to.have.property('method', 'GET')
-
-    it 'retrieves a specific order from the API', ->
-      @client.order('abc123').then (order)->
-        expect(order).to.have.property('constructor', Oshpark.Order)
-        expect(order).to.have.property('id', 'abc123')
-
-  describe '#panels', ->
-    jsonBody = '{"panels": [ { "id": "abcdef" }]}'
-
-    beforeEach ->
-      @server.respondWith [200, @jsonHeader, jsonBody]
-      @server.autoRespond = true
-
-    afterEach ->
-      @server.restore()
-
-    it 'is a promise', ->
-      expect(@client.panels()).to.eventually.be.fulfilled
-
-    it 'is to the correct URL', ->
-      @client.panels().then =>
-        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/panels')
-
-    it 'is the correct HTTP method', ->
-      @client.panels().then =>
-        expect(@server.lastRequest()).to.have.property('method', 'GET')
-
-    it 'retrieves the current users\'s panels from the API', ->
-      @client.panels().then (panels)->
-        panels.forEach (panel)->
-          expect(panel).to.have.property('constructor', Oshpark.Panel)
-          expect(panel).to.have.property('id', 'abcdef')
-
-  describe '#panel(:id)', ->
-    jsonBody = '{"panel": { "id": "abc123"} }'
-
-    beforeEach ->
-      @server.respondWith [200, @jsonHeader, jsonBody]
-      @server.autoRespond = true
-
-    afterEach ->
-      @server.restore()
-
-    it 'is a promise', ->
-      expect(@client.panel('abc123')).to.eventually.be.fulfilled
-
-    it 'fails when not passed an id', ->
-      expect(@client.panel()).to.be.rejected
-
-    it 'is to the correct URL', ->
-      @client.panel('abc123').then =>
-        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/panels/abc123')
-
-    it 'is the correct HTTP method', ->
-      @client.panel('abc123').then =>
-        expect(@server.lastRequest()).to.have.property('method', 'GET')
-
-    it 'retrieves a specific panel from the API', ->
-      @client.panel('abc123').then (panel)->
-        expect(panel).to.have.property('constructor', Oshpark.Panel)
-        expect(panel).to.have.property('id', 'abc123')
