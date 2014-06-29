@@ -91,7 +91,7 @@ describe 'Oshpark.Client', ->
         @client[resourcesName]().then =>
           expect(@server.lastRequest()).to.have.property('method', 'GET')
 
-      it "retrieves the current users\'s #{resourcesName} from the API", ->
+      it "retrieves the #{resourcesName} from the API", ->
         @client[resourcesName]().then (resources)->
           resources.forEach (resource)->
             expect(resource).to.have.property('constructor', resourceKlass)
@@ -137,7 +137,7 @@ describe 'Oshpark.Client', ->
     it 'is a promise', ->
       expect(@client.approveProject('abc123')).to.eventually.be.fulfilled
 
-    it 'fails with not passed an id', ->
+    it 'fails when not passed an id', ->
       expect(@client.approveProject()).to.be.rejected
 
     it 'is to the correct URL', ->
@@ -149,8 +149,113 @@ describe 'Oshpark.Client', ->
         expect(@server.lastRequest()).to.have.property('method', 'GET')
 
 
-    it 'returns the modified Project', ->
+    it 'resolves to the modified Project', ->
       @client.approveProject('abc123').then (project)->
         expect(project).to.have.property('constructor', Oshpark.Project)
         expect(project).to.have.property('id', 'abc123')
         expect(project).to.have.property('state', 'APPROVED')
+
+  describe '#deleteProject(:id)', ->
+
+    beforeEach ->
+      @server.respondWith [201, @jsonHeader, '']
+      @server.autoRespond = true
+
+    afterEach -> @server.restore()
+
+    it 'is a promise', ->
+      expect(@client.deleteProject('abc123')).to.eventually.be.fulfilled
+
+    it 'fails when not passed an id', ->
+      expect(@client.deleteProject()).to.be.rejected
+
+    it 'is to the correct URL', ->
+      @client.deleteProject('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/projects/abc123')
+
+    it 'is the correct HTTP method', ->
+      @client.deleteProject('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('method', 'DELETE')
+
+    it 'resolves to true', ->
+      @client.deleteProject('abc123').then (value)=>
+        expect(value).to.equal(true)
+
+  describe '#updateProject(:id, :attrs)', ->
+
+    beforeEach ->
+      @server.respondWith [200, @jsonHeader, '{ "project": { "id": "abc123" } }']
+      @server.autoRespond = true
+
+    afterEach -> @server.restore()
+
+    it 'is a promise', ->
+      expect(@client.updateProject('abc123', {})).to.eventually.be.fulfilled
+
+    it 'fails when not passed an id', ->
+      expect(@client.updateProject()).to.be.rejected
+
+    it 'is to the correct URL', ->
+      @client.updateProject('abc123', {}).then =>
+        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/projects/abc123')
+
+    it 'is the correct HTTP method', ->
+      @client.updateProject('abc123', {}).then =>
+        expect(@server.lastRequest()).to.have.property('method', 'PUT')
+
+    it 'resolves to the modified Project', ->
+      @client.updateProject('abc123').then (project)->
+        expect(project).to.have.property('constructor', Oshpark.Project)
+        expect(project).to.have.property('id', 'abc123')
+
+  describe '#cancelOrder(:id)', ->
+
+    beforeEach ->
+      @server.respondWith [200, @jsonHeader, '']
+      @server.autoRespond = true
+
+    it 'is a promise', ->
+      expect(@client.cancelOrder('abc123')).to.eventually.be.fulfilled
+
+    it 'fails when not passed an id', ->
+      expect(@client.cancelOrder()).to.be.rejected
+
+    it 'is to the correct URL', ->
+      @client.cancelOrder('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/orders/abc123')
+
+    it 'is the correct HTTP method', ->
+      @client.cancelOrder('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('method', 'DELETE')
+
+    it 'resolves to true', ->
+      @client.cancelOrder('abc123').then (value)=>
+        expect(value).to.equal(true)
+
+  describe '#updateOrder(:id, :attrs)', ->
+
+    beforeEach ->
+      @server.respondWith [200, @jsonHeader, '{ "order": { "id": "abc123" } }']
+      @server.autoRespond = true
+
+    afterEach -> @server.restore()
+
+    it 'is a promise', ->
+      expect(@client.updateOrder('abc123', {})).to.eventually.be.fulfilled
+
+    it 'fails when not passed an id', ->
+      expect(@client.updateOrder()).to.be.rejected
+
+    it 'is to the correct URL', ->
+      @client.updateOrder('abc123', {}).then =>
+        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/orders/abc123')
+
+    it 'is the correct HTTP method', ->
+      @client.updateOrder('abc123', {}).then =>
+        expect(@server.lastRequest()).to.have.property('method', 'PUT')
+
+    it 'resolves to the modified Order', ->
+      @client.updateOrder('abc123').then (order)->
+        expect(order).to.have.property('constructor', Oshpark.Order)
+        expect(order).to.have.property('id', 'abc123')
+

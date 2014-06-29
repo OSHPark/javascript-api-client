@@ -1,4 +1,11 @@
 class JQueryConnection extends Oshpark.Connection
+  constructor: ->
+    super
+    jQuery.ajaxSetup
+      dataFilter: (data,type)->
+        return null if type == 'json' && data == ''
+        data
+
   request: (method, endpoint, params={}, token)->
     headers = @defaultHeaders(token)
     url     = "#{@endpointUrl}/#{endpoint}"

@@ -14,13 +14,13 @@ deleteRequest = (endpoint, params)->
 
 reallyRequestToken = (params)->
   postRequest.call @, 'sessions', params
-    .then (json)=>
-      @token = new Oshpark.Token(json['api_session_token'])
-      ttl = @token.ttl - 10
-      ttl = 10 if ttl < 10
-      clearTimeout(lastTimeoutId) if lastTimeoutId?
-      lastTimeoutId = setTimeout (=> refreshToken.call(@)), ttl * 1000
-      @token
+  .then (json)=>
+    @token = new Oshpark.Token(json['api_session_token'])
+    ttl = @token.ttl - 10
+    ttl = 10 if ttl < 10
+    clearTimeout(lastTimeoutId) if lastTimeoutId?
+    lastTimeoutId = setTimeout (=> refreshToken.call(@)), ttl * 1000
+    @token
 
 refreshToken = (params={})->
   if @tokenPromise
@@ -30,19 +30,17 @@ refreshToken = (params={})->
 
 resources = (resourcesName,klass)->
   getRequest.call @, resourcesName
-    .then (data)->
-      new klass json for json in data[resourcesName]
+  .then (data)-> new klass json for json in data[resourcesName]
 
-argumentPromise = (id)->
+argumentPromise = (id, resourceName)->
   new RSVP.Promise (resolve,reject)->
     reject(new Error "must provide an id for #{resourceName}") unless id?
     resolve(id)
 
 resource = (resourceName,klass,id)->
-  argumentPromise(id).then =>
-    getRequest.call @, "#{resourceName}s/#{id}"
-    .then (data)->
-      new klass data[resourceName]
+  argumentPromise(id, resourceName)
+  .then => getRequest.call @, "#{resourceName}s/#{id}"
+  .then (data)-> new klass data[resourceName]
 
 class Client
   constructor: ({url, connection}={})->
@@ -90,16 +88,35 @@ class Client
     resource.call @, 'project', Oshpark.Project, id
 
   approveProject: (id)->
-    argumentPromise(id).then =>
-      getRequest.call @, "projects/#{id}/approve"
-      .then (data)->
-        new Oshpark.Project data['project']
+    argumentPromise(id, 'approveProject')
+    .then => getRequest.call @, "projects/#{id}/approve"
+    .then (data)-> new Oshpark.Project data['project']
+
+  deleteProject: (id)->
+    argumentPromise(id, 'deleteProject')
+    .then => deleteRequest.call @, "projects/#{id}"
+    .then -> true
+
+  updateProject: (id, attrs={})->
+    argumentPromise(id, 'updateProject')
+    .then => putRequest.call @, "projects/#{id}", project: attrs
+    .then (data)-> new Oshpark.Project data['project']
 
   orders: ->
     resources.call @, 'orders', Oshpark.Order
 
   order: (id)->
     resource.call @, 'order', Oshpark.Order, id
+
+  cancelOrder: (id)->
+    argumentPromise(id, 'cancelOrder')
+    .then => deleteRequest.call @, "orders/#{id}"
+    .then -> true
+
+  updateOrder: (id, attrs={})->
+    argumentPromise(id, 'updateOrder')
+    .then => putRequest.call @, "orders/#{id}", order: attrs
+    .then (data)-> new Oshpark.Order data['order']
 
   panels: ->
     resources.call @, 'panels', Oshpark.Panel
