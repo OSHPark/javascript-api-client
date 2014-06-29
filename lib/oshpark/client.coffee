@@ -124,4 +124,7 @@ class Client
   panel: (id)->
     resource.call @, 'panel', Oshpark.Panel, id
 
+  upload: (id)->
+    resource.call @, 'upload', Oshpark.Upload, id
+
 Oshpark.Client = Client

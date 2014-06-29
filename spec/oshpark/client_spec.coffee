@@ -259,3 +259,31 @@ describe 'Oshpark.Client', ->
         expect(order).to.have.property('constructor', Oshpark.Order)
         expect(order).to.have.property('id', 'abc123')
 
+  describe '#upload(:id)', ->
+    jsonBody = '{"upload": { "id": "abc123" } }'
+
+    beforeEach ->
+      @server.respondWith [200, @jsonHeader, jsonBody]
+      @server.autoRespond = true
+
+    afterEach -> @server.restore()
+
+    it 'is a promise', ->
+      expect(@client.upload('abc123')).to.eventually.be.fulfilled
+
+    it 'fails when not passed an id', ->
+      expect(@client.upload()).to.be.rejected
+
+    it 'is to the correct URL', ->
+      @client.upload('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/uploads/abc123')
+
+    it 'is the correct HTTP method', ->
+      @client.upload('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('method', 'GET')
+
+    it "retrieves a specific upload from the API", ->
+      @client.upload('abc123').then (resource)->
+        expect(resource).to.have.property('constructor', Oshpark.Upload)
+        expect(resource).to.have.property('id', 'abc123')
+
