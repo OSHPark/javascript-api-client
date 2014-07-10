@@ -1,4 +1,4 @@
-class JQueryConnection extends Oshpark.Connection
+class Oshpark.JQueryConnection extends Oshpark.Connection
   constructor: ->
     super
     jQuery.ajaxSetup
@@ -20,5 +20,3 @@ class JQueryConnection extends Oshpark.Connection
           resolve data
         error:    (xhr,textStatus,errorThrown)->
           reject errorThrown
-
-Oshpark.JQueryConnection = JQueryConnection

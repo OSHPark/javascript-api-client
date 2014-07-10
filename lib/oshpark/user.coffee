@@ -1,3 +1,1 @@
-class User extends Oshpark.modelWithAttributes(['id'])
-
-Oshpark.User = User
+class Oshpark.User extends Oshpark.modelWithAttributes(['id'])

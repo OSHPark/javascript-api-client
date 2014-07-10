@@ -1,9 +1,11 @@
-class Connection
+class Oshpark.Connection
   constructor: (@endpointUrl)->
 
   request: (method, endpoint, params={}, token)->
-    new RSVP.Promise (resolve,reject)->
-      reject new Error "Must choose connection subclass"
+    @_subclassesMustImplement('request')
+
+  createUpload: ->
+    @_subclassesMustImplement('createUpload')
 
   defaultHeaders: (token=null)->
     headers = {
@@ -12,4 +14,6 @@ class Connection
     headers['Authorization'] = token.token if token?
     headers
 
-Oshpark.Connection = Connection
+  _subclassesMustImplement: (methodName)->
+    new RSVP.Promise (resolve,reject)->
+      reject new Error "Connection subclasses must implement the `#{methodName}` method."

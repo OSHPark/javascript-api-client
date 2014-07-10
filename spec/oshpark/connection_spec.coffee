@@ -12,6 +12,11 @@ describe 'Oshpark.Connection', ->
     it 'rejects', ->
       expect(connection.request()).to.be.rejected
 
+  describe '#createUpload', ->
+
+    it 'rejects', ->
+      expect(connection.request()).to.be.rejected
+
   describe '#defaultHeaders', ->
 
     describe 'when there is no token', ->

@@ -1,4 +1,4 @@
-class Project extends Oshpark.modelWithAttributes([ 'id', 'design_file_url', 'name', 'description', 'top_image', 'bottom_image', 'width_in_mils', 'pcb_layers', 'state', 'layers' ])
+class Oshpark.Project extends Oshpark.modelWithAttributes([ 'id', 'design_file_url', 'name', 'description', 'top_image', 'bottom_image', 'width_in_mils', 'pcb_layers', 'state', 'layers' ])
 
   topImage:       -> new Oshpark.Image @top_image if @top_image?
   bottomImage:    -> new Oshpark.Image @bottom_image if @bottom_image?
@@ -8,5 +8,3 @@ class Project extends Oshpark.modelWithAttributes([ 'id', 'design_file_url', 'na
   heightInInches: -> @heightInMils   / 1000.0
   widthInMm:      -> @widthInInches  / 25.4
   heightInMm:     -> @heightInInches / 25.4
-
-Oshpark.Project = Project
