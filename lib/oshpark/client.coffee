@@ -28,19 +28,19 @@ refreshToken = (params={})->
   else
     @tokenPromise = reallyRequestToken.call(@, params)
 
-resources = (resourcesName,klass)->
+resources = (resourcesName,klass, jsonRoot=resourcesName)->
   getRequest.call @, resourcesName
-  .then (data)-> new klass json for json in data[resourcesName]
+  .then (data)-> new klass json for json in data[jsonRoot]
 
 argumentPromise = (id, resourceName)->
   new RSVP.Promise (resolve,reject)->
     reject(new Error "must provide an id for #{resourceName}") unless id?
     resolve(id)
 
-resource = (resourceName,klass,id)->
+resource = (resourceName,klass,id,jsonRoot=resourceName)->
   argumentPromise(id, resourceName)
   .then => getRequest.call @, "#{resourceName}s/#{id}"
-  .then (data)-> new klass data[resourceName]
+  .then (data)-> new klass data[jsonRoot]
 
 computeApiKey = (email, secret)->
   source = "#{email}:#{secret}:#{@token.token}"
@@ -110,6 +110,12 @@ class Oshpark.Client
     argumentPromise(id, 'updateProject')
     .then => putRequest.call @, "projects/#{id}", project: attrs
     .then (data)-> new Oshpark.Project data['project']
+
+  sharedProjects: ->
+    resources.call @, 'shared_projects', Oshpark.Project, 'projects'
+
+  sharedProject: (id)->
+    resource.call @, 'shared_project', Oshpark.Project, id, 'project'
 
   # Retrieve all a user's orders.
   orders: ->

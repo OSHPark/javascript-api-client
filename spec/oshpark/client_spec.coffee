@@ -208,6 +208,54 @@ describe 'Oshpark.Client', ->
         expect(project).to.have.property('constructor', Oshpark.Project)
         expect(project).to.have.property('id', 'abc123')
 
+  describe '#sharedProjects', ->
+
+    beforeEach ->
+      @server.respondWith [200, @jsonHeader, '{ "projects": [ { "id": "abc123" } ] }']
+      @server.autoRespond = true
+
+    afterEach -> @server.restore()
+
+    it 'is a promise', ->
+      expect(@client.sharedProjects()).to.eventually.be.fulfilled
+
+    it 'is to the correct URL', ->
+      @client.sharedProjects().then =>
+        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/shared_projects')
+
+    it 'is the correct HTTP method', ->
+      @client.sharedProjects().then =>
+        expect(@server.lastRequest()).to.have.property('method', 'GET')
+
+    it 'retrieves the projects from the API', ->
+      @client.sharedProjects().then (projects)->
+        projects.forEach (project)->
+          expect(project).to.have.property('constructor', Oshpark.Project)
+          expect(project).to.have.property('id', 'abc123')
+
+  describe '#sharedProject', ->
+    beforeEach ->
+      @server.respondWith [200, @jsonHeader, '{ "project": { "id": "abc123" } }']
+      @server.autoRespond = true
+
+    afterEach -> @server.restore()
+
+    it 'is a promise', ->
+      expect(@client.sharedProject('abc123')).to.eventually.be.fulfilled
+
+    it 'is to the correct URL', ->
+      @client.sharedProject('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/shared_projects/abc123')
+
+    it 'is the correct HTTP method', ->
+      @client.sharedProject('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('method', 'GET')
+
+    it 'retrieves a specific project from the API', ->
+      @client.sharedProject('abc123').then (project)->
+        expect(project).to.have.property('constructor', Oshpark.Project)
+        expect(project).to.have.property('id', 'abc123')
+
   describe '#cancelOrder(:id)', ->
 
     beforeEach ->
