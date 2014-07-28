@@ -32,9 +32,9 @@ resources = (resourcesName,klass, jsonRoot=resourcesName)->
   getRequest.call @, resourcesName
   .then (data)-> new klass json for json in data[jsonRoot]
 
-argumentPromise = (id, resourceName)->
+argumentPromise = (id, resourceName, argName='id')->
   new RSVP.Promise (resolve,reject)->
-    reject(new Error "must provide an id for #{resourceName}") unless id?
+    reject(new Error "must provide an #{argName} for #{resourceName}") unless id?
     resolve(id)
 
 resource = (resourceName,klass,id,jsonRoot=resourceName)->
@@ -148,3 +148,15 @@ class Oshpark.Client
   # Retrieve a specific upload, by ID.
   upload: (id)->
     resource.call @, 'upload', Oshpark.Upload, id
+
+  # Retrieve a specific import, by ID.
+  import: (id)->
+    resource.call @, 'import', Oshpark.Import, id
+
+  # Create an import from a URL.
+  createImport: (url)->
+    argumentPromise(url, 'createImport', 'url')
+    .then => 
+      postRequest.call @, 'imports', import: {url: url}
+    .then (data)-> new Oshpark.Import data['import']
+

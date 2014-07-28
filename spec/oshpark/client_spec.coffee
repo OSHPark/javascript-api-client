@@ -335,3 +335,59 @@ describe 'Oshpark.Client', ->
         expect(resource).to.have.property('constructor', Oshpark.Upload)
         expect(resource).to.have.property('id', 'abc123')
 
+  describe '#import(:id)', ->
+    jsonBody = '{"import": { "id": "abc123" } }'
+
+    beforeEach ->
+      @server.respondWith [200, @jsonHeader, jsonBody]
+      @server.autoRespond = true
+
+    afterEach -> @server.restore()
+
+    it 'is a promise', ->
+      expect(@client.import('abc123')).to.eventually.be.fulfilled
+
+    it 'fails when not passed an id', ->
+      expect(@client.import()).to.be.rejected
+
+    it 'is to the correct URL', ->
+      @client.import('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/imports/abc123')
+
+    it 'is the correct HTTP method', ->
+      @client.import('abc123').then =>
+        expect(@server.lastRequest()).to.have.property('method', 'GET')
+
+    it "retrieves a specific import from the API", ->
+      @client.import('abc123').then (resource)->
+        expect(resource).to.have.property('constructor', Oshpark.Import)
+        expect(resource).to.have.property('id', 'abc123')
+
+  describe '#createImport(:url)', ->
+    jsonBody = '{"import": { "original_url": "http://example.com/design.brd" } }'
+
+    beforeEach ->
+      @server.respondWith [201, @jsonHeader, jsonBody]
+      @server.autoRespond = true
+
+    afterEach -> @server.restore()
+
+    it 'is a promise', ->
+      expect(@client.createImport('http://example.com/design.brd')).to.eventually.be.fulfilled
+
+    it 'fails when not passed a url', ->
+      expect(@client.createImport()).to.be.rejected
+
+    it 'is to the correct URL', ->
+      @client.createImport('http://example.com/design.brd').then =>
+        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/imports')
+
+    it 'is the correct HTTP method', ->
+      @client.createImport('http://example.com/design.brd').then =>
+        expect(@server.lastRequest()).to.have.property('method', 'POST')
+
+    it "retrieves a specific import from the API", ->
+      @client.createImport('http://example.com/design.brd').then (resource)->
+        expect(resource).to.have.property('constructor', Oshpark.Import)
+        expect(resource).to.have.property('original_url', 'http://example.com/design.brd')
+
