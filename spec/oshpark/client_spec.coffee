@@ -208,6 +208,46 @@ describe 'Oshpark.Client', ->
         expect(project).to.have.property('constructor', Oshpark.Project)
         expect(project).to.have.property('id', 'abc123')
 
+  describe '#priceEstimate(:width, :height, :pcbLayers, :quantity)', ->
+    beforeEach ->
+      @server.respondWith [200, @jsonHeader, '{ "pricing": {
+        "width_in_mils"  : 1000,
+        "height_in_mils" : 1000,
+        "pcb_layers"     : 2,
+        "quantity"       : 3,
+        "subtotal"       : 5
+      } }']
+      @server.autoRespond = true
+
+    afterEach -> @server.restore()
+
+    it 'is a promise', ->
+      expect(@client.priceEstimate(1000,1000,2,3)).to.eventually.be.fulfilled
+
+    it 'fails when not passed a width', ->
+      expect(@client.priceEstimate(undefined, 1000, 2, 3)).to.be.rejected
+
+    it 'fails when not passed a height', ->
+      expect(@client.priceEstimate(1000, undefined, 2, 3)).to.be.rejected
+
+    it 'is to the correct URL', ->
+      @client.priceEstimate(1000, 1000, 2, 3).then =>
+        expect(@server.lastRequest()).to.have.property('url', 'https://oshpark.com/api/v1/pricing')
+
+    it 'is the correct HTTP method', ->
+      @client.priceEstimate(1000, 1000, 2, 3).then =>
+        expect(@server.lastRequest()).to.have.property('method', 'POST')
+
+    it 'resolves to the expected price', ->
+      @client.priceEstimate(1000, 1000, 2, 3).then (price)=>
+        expect(price).to.have.property('pricing')
+        price = price['pricing']
+        expect(price).to.have.property('width_in_mils', 1000)
+        expect(price).to.have.property('height_in_mils', 1000)
+        expect(price).to.have.property('pcb_layers', 2)
+        expect(price).to.have.property('quantity', 3)
+        expect(price).to.have.property('subtotal', 5)
+
   describe '#sharedProjects', ->
 
     beforeEach ->

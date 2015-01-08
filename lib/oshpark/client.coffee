@@ -117,6 +117,19 @@ class Oshpark.Client
   sharedProject: (id)->
     resource.call @, 'shared_project', Oshpark.Project, id, 'project'
 
+  # Request a price estimate
+  #
+  # @param width    In thousandths of an Inch
+  # @param height   In thousandths of an Inch
+  # @param layers   Number of copper layers
+  # @param quantity (Optional) defaults to the minimum quantity
+  priceEstimate: (width, height, layers=2, quantity=3)->
+    new RSVP.Promise (resolve, reject)=>
+      return reject "Must provide a board height" unless height?
+      return reject "Must provide a board width" unless width?
+      postRequest.call @, 'pricing', {width_in_mils: width, height_in_mils: height, pcb_layers: layers, quantity: quantity }
+        .then(resolve,reject)
+
   # Retrieve all a user's orders.
   orders: ->
     resources.call @, 'orders', Oshpark.Order
