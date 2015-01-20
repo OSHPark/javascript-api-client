@@ -1,8 +1,13 @@
 describe 'Oshpark.Client', ->
-
   beforeEach ->
+    @server = sinon.fakeServer.create()
+    @server.lastRequest = =>
+      @server.requests[@server.requests.length - 1]
     @jsonHeader  = {'Content-Type': 'application/json'}
     @client = new Oshpark.Client
+
+  afterEach ->
+    @server.restore()
 
   it 'exists', ->
     expect(Oshpark.Client).to.exist

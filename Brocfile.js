@@ -1,8 +1,12 @@
+var dotenv = require('dotenv');
+dotenv.load();
+
 var filterCoffeeScript = require('broccoli-coffee');
 var concatFilter       = require('broccoli-concat');
 var mergeTrees         = require('broccoli-merge-trees');
 var selectFilter       = require('broccoli-select');
 var env                = require('broccoli-env').getEnv();
+var replace            = require('broccoli-replace');
 
 // Concatenate all coffeescript in lib.
 lib = filterCoffeeScript('lib');
@@ -12,7 +16,24 @@ lib = concatFilter(lib, {
 });
 
 // Concatenate all coffeescript in spec.
-spec = filterCoffeeScript('spec');
+spec = replace('spec', {
+  files: [ '**/*.coffee' ],
+  patterns: [
+    {
+      match: 'EMAIL',
+      replacement: process.env.EMAIL
+    },
+    {
+      match: 'PASSWORD',
+      replacement: process.env.PASSWORD
+    },
+    {
+      match: 'API_SECRET',
+      replacement: process.env.API_SECRET
+    }
+  ]
+});
+spec = filterCoffeeScript(spec);
 spec = concatFilter(spec, {
   inputFiles: ['**/*.js'],
   outputFile: '/spec.js'

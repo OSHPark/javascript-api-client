@@ -60,7 +60,7 @@ class Oshpark.Client
   isAuthenticated: ->
     @token && @token.user?
 
-  # Authenticate with a given username and password, or api secret.
+  # Authenticate with a given email address and password, or api secret.
   #
   #     client.authenticate 'user@example.com', withPassword: 'myPassword'
   #
@@ -75,6 +75,8 @@ class Oshpark.Client
         params.password = opts.withPassword
       else if opts.withApiSecret?
         params.api_key = computeApiKey.call(@, email, opts.withApiSecret)
+      else
+        return reject "Must provide a password or api secret"
 
       new RSVP.Promise (resolve,reject)=>
         refreshToken.call(@, params)
@@ -82,7 +84,7 @@ class Oshpark.Client
             if token.userId?
               resolve token.userId
             else
-              reject "Incorrect username or password"
+              reject "Incorrect email address or password"
           .catch (error)-> reject error
 
   # Retrieve a list of the current user's projects.
@@ -169,7 +171,7 @@ class Oshpark.Client
   # Create an import from a URL.
   createImport: (url)->
     argumentPromise(url, 'createImport', 'url')
-    .then => 
+    .then =>
       postRequest.call @, 'imports', import: {url: url}
     .then (data)-> new Oshpark.Import data['import']
 
