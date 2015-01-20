@@ -15,7 +15,7 @@ deleteRequest = (endpoint, params)->
 reallyRequestToken = (params)->
   postRequest.call @, 'sessions', params
   .then (json)=>
-    @token = new Oshpark.Token(json['api_session_token'])
+    @token = new Oshpark.Token(json['api_session_token'], @)
     ttl = @token.ttl - 10
     ttl = 10 if ttl < 10
     clearTimeout(lastTimeoutId) if lastTimeoutId?
@@ -30,7 +30,7 @@ refreshToken = (params={})->
 
 resources = (resourcesName,klass, jsonRoot=resourcesName)->
   getRequest.call @, resourcesName
-  .then (data)-> new klass json for json in data[jsonRoot]
+  .then (data)=> new klass json, @ for json in data[jsonRoot]
 
 argumentPromise = (id, resourceName, argName='id')->
   new RSVP.Promise (resolve,reject)->
@@ -40,7 +40,7 @@ argumentPromise = (id, resourceName, argName='id')->
 resource = (resourceName,klass,id,jsonRoot=resourceName)->
   argumentPromise(id, resourceName)
   .then => getRequest.call @, "#{resourceName}s/#{id}"
-  .then (data)-> new klass data[jsonRoot]
+  .then (data)=> new klass data[jsonRoot], @
 
 computeApiKey = (email, secret)->
   source = "#{email}:#{secret}:#{@token.token}"
@@ -99,7 +99,7 @@ class Oshpark.Client
   approveProject: (id)->
     argumentPromise(id, 'approveProject')
     .then => getRequest.call @, "projects/#{id}/approve"
-    .then (data)-> new Oshpark.Project data['project']
+    .then (data)=> new Oshpark.Project data['project'], @
 
   # Remove a user's project
   deleteProject: (id)->
@@ -111,7 +111,7 @@ class Oshpark.Client
   updateProject: (id, attrs={})->
     argumentPromise(id, 'updateProject')
     .then => putRequest.call @, "projects/#{id}", project: attrs
-    .then (data)-> new Oshpark.Project data['project']
+    .then (data)=> new Oshpark.Project data['project'], @
 
   sharedProjects: ->
     resources.call @, 'shared_projects', Oshpark.Project, 'projects'
@@ -150,7 +150,7 @@ class Oshpark.Client
   updateOrder: (id, attrs={})->
     argumentPromise(id, 'updateOrder')
     .then => putRequest.call @, "orders/#{id}", order: attrs
-    .then (data)-> new Oshpark.Order data['order']
+    .then (data)=> new Oshpark.Order data['order'], @
 
   # Retrieve recent panels.
   panels: ->
@@ -172,6 +172,20 @@ class Oshpark.Client
   createImport: (url)->
     argumentPromise(url, 'createImport', 'url')
     .then =>
-      postRequest.call @, 'imports', import: {url: url}
-    .then (data)-> new Oshpark.Import data['import']
+      postRequest.call @, 'imports', url: url
+    .then (data)=> new Oshpark.Import data['import'], @
 
+  # Wait for a given import to be finished and return the Project
+  # created by it.
+  projectFromImport: (id)->
+    checkImport = (id,resolve,reject)=>
+      @import id
+        .then (_import)=>
+          if _import.isProcessing()
+            window.setTimeout (=> checkImport id, resolve, reject), 2000
+          else if _import.isSuccessful()
+            resolve @project(_import.projectId)
+          else
+            reject _import
+
+    new RSVP.Promise (resolve,reject)=> checkImport id, resolve, reject
