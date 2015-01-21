@@ -1,5 +1,11 @@
 lastTimeoutId = null
 
+attributes_of = (object)->
+  if object.__attrs__?
+    object.__attrs__
+  else
+    object
+
 postRequest = (endpoint, params)->
   @connection.request 'POST', endpoint, params, @token
 
@@ -14,13 +20,13 @@ deleteRequest = (endpoint, params)->
 
 reallyRequestToken = (params)->
   postRequest.call @, 'sessions', params
-  .then (json)=>
-    @token = new Oshpark.Token(json['api_session_token'], @)
-    ttl = @token.ttl - 10
-    ttl = 10 if ttl < 10
-    clearTimeout(lastTimeoutId) if lastTimeoutId?
-    lastTimeoutId = setTimeout (=> refreshToken.call(@)), ttl * 1000
-    @token
+    .then (json)=>
+      @token = new Oshpark.Token(json['api_session_token'], @)
+      ttl = @token.ttl - 10
+      ttl = 10 if ttl < 10
+      clearTimeout(lastTimeoutId) if lastTimeoutId?
+      lastTimeoutId = setTimeout (=> refreshToken.call(@)), ttl * 1000
+      @token
 
 refreshToken = (params={})->
   if @tokenPromise
@@ -30,7 +36,11 @@ refreshToken = (params={})->
 
 resources = (resourcesName,klass, jsonRoot=resourcesName)->
   getRequest.call @, resourcesName
-  .then (data)=> new klass json, @ for json in data[jsonRoot]
+    .then (data)=> new klass json, @ for json in data[jsonRoot]
+
+createResource = (resourcesName, klass, params={}, jsonRoot=resourcesName)->
+  postRequest.call @, resourcesName, params
+    .then (data)=> new klass data[jsonRoot], @
 
 argumentPromise = (id, resourceName, argName='id')->
   new RSVP.Promise (resolve,reject)->
@@ -132,6 +142,10 @@ class Oshpark.Client
       postRequest.call @, 'pricing', {width_in_mils: width, height_in_mils: height, pcb_layers: layers, quantity: quantity }
         .then(resolve,reject)
 
+  # Create a new order.
+  createOrder: ->
+    createResource.call @, 'orders', Oshpark.Order, {}, 'order'
+
   # Retrieve all a user's orders.
   orders: ->
     resources.call @, 'orders', Oshpark.Order
@@ -151,6 +165,28 @@ class Oshpark.Client
     argumentPromise(id, 'updateOrder')
     .then => putRequest.call @, "orders/#{id}", order: attrs
     .then (data)=> new Oshpark.Order data['order'], @
+
+  # Set the delivery address for the order.
+  setOrderAddress: (id, address)->
+    argumentPromise(id, 'setOrderAddress').then =>
+      argumentPromise(address, 'setOrderAddress', 'address').then =>
+        postRequest.call @, "orders/#{id}/set_address", order: {address: attributes_of address }
+          .then (data)=> new Oshpark.Order data['order'], @
+
+  # Set the order to a specific shipping rate.
+  setOrderShippingRate: (id, rate)->
+    argumentPromise(id, 'setOrderShippingRate').then =>
+      argumentPromise(rate, 'setOrderShippingRate', 'rate').then =>
+        postRequest.call @, "orders/#{id}/set_shipping_rate", order: {shipping_rate: attributes_of rate }
+          .then (data)=> new Oshpark.Order data['order'], @
+
+  # Retrieve the available shipping rates for a given address.
+  shippingRates: (address)->
+    argumentPromise(address, 'shippingRates', 'address').then =>
+      postRequest.call @, "shipping_rates", address: attributes_of address
+        .then (data)=>
+          new Oshpark.ShippingRate json, @ for json in data['shipping_rates']
+
 
   # Retrieve recent panels.
   panels: ->

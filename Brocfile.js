@@ -32,6 +32,10 @@ spec = replace('spec', {
       replacement: process.env.API_SECRET
     },
     {
+      match: 'API_URL',
+      replacement: process.env.API_URL
+    },
+    {
       match: 'FIXTURE_URL',
       replacement: process.env.FIXTURE_URL
     }
