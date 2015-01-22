@@ -434,5 +434,5 @@ describe 'Oshpark.Client', ->
     it "retrieves a specific import from the API", ->
       @client.createImport('http://example.com/design.brd').then (resource)->
         expect(resource).to.have.property('constructor', Oshpark.Import)
-        expect(resource).to.have.property('original_url', 'http://example.com/design.brd')
+        expect(resource).to.have.property('originalUrl', 'http://example.com/design.brd')
 
