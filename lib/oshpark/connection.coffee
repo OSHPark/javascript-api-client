@@ -1,4 +1,4 @@
-class Oshpark.Connection
+class Connection
   constructor: (@endpointUrl)->
 
   request: (method, endpoint, params={}, token)->
@@ -17,3 +17,5 @@ class Oshpark.Connection
   _subclassesMustImplement: (methodName)->
     new RSVP.Promise (resolve,reject)->
       reject new Error "Connection subclasses must implement the `#{methodName}` method."
+
+`export default Connection`

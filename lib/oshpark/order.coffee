@@ -1,14 +1,18 @@
-class Oshpark.Order extends Oshpark.modelWithAttributes([
+`import modelWithAttributes from 'oshpark/model_with_attributes'`
+`import Address from 'oshpark/address'`
+`import ShippingRate from 'oshpark/shipping_rate'`
+
+class Order extends modelWithAttributes([
   'id', 'board_cost', 'cancellation_reason', 'cancelled_at', 'ordered_at',
   'payment_provider', 'payment_received_at', 'project_name',  'quantity',
   'shipping_address', 'shipping_cost', 'shipping_country', 'shipping_method',
   'shipping_name', 'state', 'total_cost', 'project_id', 'panel_id' ])
 
   address: ->
-    new Oshpark.Address @__attrs__.address
+    new Address @__attrs__.address
 
   shippingRate: ->
-    new Oshpark.ShippingRate @__attrs__.shipping_rate
+    new ShippingRate @__attrs__.shipping_rate
 
   isEmpty:      -> @state == 'EMPTY'
   isNew:        -> @state == 'NEW'
@@ -16,3 +20,5 @@ class Oshpark.Order extends Oshpark.modelWithAttributes([
   isProcessing: -> @state == 'PROCESSING'
   isShipped:    -> @state == 'SHIPPED'
   isCancelled:  -> @state == 'CANCELLED'
+
+`export default Order`

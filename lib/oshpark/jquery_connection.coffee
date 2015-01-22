@@ -1,4 +1,6 @@
-class Oshpark.JQueryConnection extends Oshpark.Connection
+`import Connection from 'oshpark/connection'`
+
+class JQueryConnection extends Connection
   constructor: ->
     super
     jQuery.ajaxSetup
@@ -20,3 +22,5 @@ class Oshpark.JQueryConnection extends Oshpark.Connection
           resolve data
         error:    (xhr,textStatus,errorThrown)->
           reject errorThrown
+
+`export default JQueryConnection`

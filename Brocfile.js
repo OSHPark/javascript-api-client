@@ -7,15 +7,25 @@ var mergeTrees         = require('broccoli-merge-trees');
 var selectFilter       = require('broccoli-select');
 var env                = require('broccoli-env').getEnv();
 var replace            = require('broccoli-replace');
+var compileModules     = require('broccoli-es6-module-transpiler');
+var useStrictRemover   = require('broccoli-use-strict-remover');
 
-// Concatenate all coffeescript in lib.
-lib = filterCoffeeScript('lib');
-lib = concatFilter(lib, {
-  inputFiles: ['**/*.js'],
-  outputFile: '/oshpark.js'
+// Compile all CoffeeScript in lib
+lib = filterCoffeeScript('lib', {
+  bare: true
 });
 
-// Concatenate all coffeescript in spec.
+// Transpile es6 modules into a bundle.
+lib = compileModules(lib, {
+  moduleName: true,
+  formatter: 'bundle',
+  output: '/oshpark.js'
+});
+
+// Remove "use strict" from lib files.
+lib = useStrictRemover(lib);
+
+// Replace patterns in Spec files.
 spec = replace('spec', {
   files: [ '**/*.coffee' ],
   patterns: [
@@ -41,16 +51,22 @@ spec = replace('spec', {
     }
   ]
 });
+
+// Compile coffeescript specs into javascript.
 spec = filterCoffeeScript(spec);
+
+// Concatenate specs.
 spec = concatFilter(spec, {
   inputFiles: ['**/*.js'],
   outputFile: '/spec.js'
 });
-spec_html = selectFilter('spec', {
+
+// Get the spec HTML file.
+specHtml = selectFilter('spec', {
   acceptFiles: ['spec.html'],
   outputDir: '/'
 });
-spec = mergeTrees([spec, spec_html]);
+spec = mergeTrees([spec, specHtml]);
 
 // Development dependencies
 mocha = selectFilter('bower_components/mocha', {
