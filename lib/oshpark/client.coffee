@@ -175,6 +175,17 @@ class Client
     .then => putRequest.call @, "orders/#{id}", order: attrs
     .then (data)=> new Order data['order'], @
 
+  # Add an item (at this time only a project) to the order.
+  addItemToOrder: (id, projectId, quantity=3)->
+    argumentPromise(id, 'addItemToOrder')
+      .then => argumentPromise(projectId, 'addItemToOrder', 'projectId')
+      .then =>
+        postRequest.call @, "orders/#{id}/add_item", order:
+          project_id: projectId
+          quantity:   quantity
+      .then (data)=>
+        new Order data['order'], @
+
   # Set the delivery address for the order.
   setOrderAddress: (id, address)->
     argumentPromise(id, 'setOrderAddress').then =>
@@ -188,6 +199,12 @@ class Client
       argumentPromise(rate, 'setOrderShippingRate', 'rate').then =>
         postRequest.call @, "orders/#{id}/set_shipping_rate", order: {shipping_rate: attributes_of rate }
           .then (data)=> new Order data['order'], @
+
+  # Check out an order
+  checkoutOrder: (id)->
+    argumentPromise(id, 'checkoutOrder').then =>
+      postRequest.call @, "orders/#{id}/checkout"
+        .then (data)=> new Order data['order'], @
 
   # Retrieve the available shipping rates for a given address.
   shippingRates: (address)->

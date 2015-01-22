@@ -18,7 +18,7 @@ cleanup = ->
 
       client.orders().then (orders)->
         for order in orders
-          client.cancelOrder order.id
+          client.cancelOrder order.id if order.isCancellable()
 
 describe 'API Workflow', ->
   before ->
@@ -105,3 +105,6 @@ describe 'API Workflow', ->
 
   it 'checks out the order', ->
     @timeout 10000
+    @client.checkoutOrder @orderId
+      .then (order)->
+        expect(order.isReceived()).to.be.true

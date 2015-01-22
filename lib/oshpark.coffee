@@ -6,6 +6,7 @@
 `import JQueryConnection from 'oshpark/jquery_connection'`
 `import Layer from 'oshpark/layer'`
 `import Order from 'oshpark/order'`
+`import OrderItem from 'oshpark/order_item'`
 `import Panel from 'oshpark/panel'`
 `import Project from 'oshpark/project'`
 `import ShippingRate from 'oshpark/shipping_rate'`
@@ -22,6 +23,7 @@ Oshpark =
   JQueryConnection: JQueryConnection
   Layer:            Layer
   Order:            Order
+  OrderItem:        OrderItem
   Panel:            Panel
   Project:          Project
   ShippingRate:     ShippingRate
