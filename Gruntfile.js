@@ -25,6 +25,7 @@ module.exports = function(grunt) {
     mocha: {
       specs: {
         src: 'public/spec.html',
+        timeout: 60000
       }
     },
     clean: ['public', 'dist']

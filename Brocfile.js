@@ -140,7 +140,7 @@ else {
     extensions: ['js']
   });
 
-  exported = mergeTrees([lib, min, zip]);
+  exported = mergeTrees([lib, min, zip], {overwrite: true});
 }
 
 module.exports = exported;
