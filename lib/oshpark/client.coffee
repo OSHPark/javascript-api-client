@@ -6,6 +6,7 @@
 `import Panel from 'oshpark/panel'`
 `import Upload from 'oshpark/upload'`
 `import Import from 'oshpark/import'`
+`import Promise from 'rsvp/promise'`
 
 lastTimeoutId = null
 
@@ -52,7 +53,7 @@ createResource = (resourcesName, klass, params={}, jsonRoot=resourcesName)->
     .then (data)=> new klass data[jsonRoot], @
 
 argumentPromise = (id, resourceName, argName='id')->
-  new RSVP.Promise (resolve,reject)->
+  new Promise (resolve,reject)->
     reject(new Error "must provide an #{argName} for #{resourceName}") unless id?
     resolve(id)
 
@@ -97,7 +98,7 @@ class Client
       else
         return reject "Must provide a password or api secret"
 
-      new RSVP.Promise (resolve,reject)=>
+      new Promise (resolve,reject)=>
         refreshToken.call(@, params)
           .then (token)->
             if token.userId?
@@ -145,7 +146,7 @@ class Client
   # @param layers   Number of copper layers
   # @param quantity (Optional) defaults to the minimum quantity
   priceEstimate: (width, height, layers=2, quantity=3)->
-    new RSVP.Promise (resolve, reject)=>
+    new Promise (resolve, reject)=>
       return reject "Must provide a board height" unless height?
       return reject "Must provide a board width" unless width?
       postRequest.call @, 'pricing', {width_in_mils: width, height_in_mils: height, pcb_layers: layers, quantity: quantity }
@@ -250,6 +251,6 @@ class Client
           else
             reject _import
 
-    new RSVP.Promise (resolve,reject)=> checkImport id, resolve, reject
+    new Promise (resolve,reject)=> checkImport id, resolve, reject
 
 `export default Client`

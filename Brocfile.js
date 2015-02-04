@@ -15,6 +15,8 @@ lib = filterCoffeeScript('lib', {
   bare: true
 });
 
+lib = mergeTrees([lib, 'node_modules/rsvp/lib']);
+
 // Transpile es6 modules into a bundle.
 lib = compileModules(lib, {
   moduleName: true,

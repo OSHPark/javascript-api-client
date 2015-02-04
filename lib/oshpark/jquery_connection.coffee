@@ -1,4 +1,5 @@
 `import Connection from 'oshpark/connection'`
+`import Promise from 'rsvp/promise'`
 
 class JQueryConnection extends Connection
   constructor: ->
@@ -11,7 +12,7 @@ class JQueryConnection extends Connection
   request: (method, endpoint, params={}, token)->
     headers = @defaultHeaders(token)
     url     = "#{@endpointUrl}/#{endpoint}"
-    new RSVP.Promise (resolve,reject)->
+    new Promise (resolve,reject)->
       jQuery.ajax
         dataType: 'json'
         data:     params

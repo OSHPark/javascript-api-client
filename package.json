@@ -1,6 +1,6 @@
 {
   "name": "oshpark",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Browser API client for OSH-Park",
   "main": "dist/oshpark.js",
   "author": {
@@ -41,6 +41,6 @@
   },
   "dependencies": {
     "request": "^2.51.0",
-    "rsvp": "~3.0.9"
+    "rsvp": "^3.0.16"
   }
 }

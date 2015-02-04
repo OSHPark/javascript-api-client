@@ -1,3 +1,5 @@
+`import Promise from 'rsvp/promise'`
+
 class Connection
   constructor: (@endpointUrl)->
 
@@ -15,7 +17,7 @@ class Connection
     headers
 
   _subclassesMustImplement: (methodName)->
-    new RSVP.Promise (resolve,reject)->
+    new Promise (resolve,reject)->
       reject new Error "Connection subclasses must implement the `#{methodName}` method."
 
 `export default Connection`
