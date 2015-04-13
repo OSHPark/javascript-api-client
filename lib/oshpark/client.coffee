@@ -238,6 +238,14 @@ class Client
       postRequest.call @, 'imports', url: url
     .then (data)=> new Import data['import'], @
 
+  # Retrieve a specific user, by ID.
+  user: (id)->
+    resource.call @, 'users', User, id
+
+  # Retrieve the current user.
+  currentUser: ->
+    resource.call @, 'users', User, @token.user
+
   # Wait for a given import to be finished and return the Project
   # created by it.
   projectFromImport: (id)->
