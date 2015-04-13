@@ -1334,7 +1334,7 @@
 
       return User;
 
-    })(oshpark$model_with_attributes$$default(['id']));
+    })(oshpark$model_with_attributes$$default(['id', 'email', 'name', 'username', 'gravatar_url']));
 
     var oshpark$user$$default = oshpark$user$$User;
     var oshpark$token$$Token,
@@ -2055,6 +2055,14 @@
             return new oshpark$import$$default(data['import'], _this);
           };
         })(this));
+      };
+
+      Client.prototype.user = function(id) {
+        return oshpark$client$$resource.call(this, 'users', User, id);
+      };
+
+      Client.prototype.currentUser = function() {
+        return oshpark$client$$resource.call(this, 'users', User, this.token.user);
       };
 
       Client.prototype.projectFromImport = function(id) {
