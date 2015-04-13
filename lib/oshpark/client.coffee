@@ -241,11 +241,11 @@ class Client
 
   # Retrieve a specific user, by ID.
   user: (id)->
-    resource.call @, 'users', User, id
+    resource.call @, 'user', User, id
 
   # Retrieve the current user.
   currentUser: ->
-    resource.call @, 'users', User, @token.user
+    resource.call @, 'user', User, @token.userId
 
   # Wait for a given import to be finished and return the Project
   # created by it.
