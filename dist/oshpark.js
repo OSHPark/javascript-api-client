@@ -2058,11 +2058,11 @@
       };
 
       Client.prototype.user = function(id) {
-        return oshpark$client$$resource.call(this, 'users', User, id);
+        return oshpark$client$$resource.call(this, 'users', oshpark$user$$default, id);
       };
 
       Client.prototype.currentUser = function() {
-        return oshpark$client$$resource.call(this, 'users', User, this.token.user);
+        return oshpark$client$$resource.call(this, 'users', oshpark$user$$default, this.token.user);
       };
 
       Client.prototype.projectFromImport = function(id) {

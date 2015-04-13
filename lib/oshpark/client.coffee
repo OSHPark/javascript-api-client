@@ -6,6 +6,7 @@
 `import Panel from 'oshpark/panel'`
 `import Upload from 'oshpark/upload'`
 `import Import from 'oshpark/import'`
+`import User from 'oshpark/user'`
 `import Promise from 'rsvp/promise'`
 
 lastTimeoutId = null
